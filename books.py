@@ -28,3 +28,15 @@ async def skip_book(skip_book: Optional[str] = None):
 @app.get("/books/{book_id}")
 async def get_book_by_id(book_id: str):
     return BOOKS.get(book_id)
+
+
+@app.post("/books")
+async def create_book(title, author):
+    get_last_book_num = 0
+
+    if len(BOOKS) > 0:
+        get_last_book_num = int(list(
+            BOOKS.keys())[-1].split("_")[-1])
+
+    BOOKS[f"book_{get_last_book_num + 1}"] = {"title": title, "author": author}
+    return BOOKS[f"book_{get_last_book_num + 1}"]
