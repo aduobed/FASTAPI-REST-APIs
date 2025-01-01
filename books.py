@@ -53,7 +53,11 @@ async def skip_book(skip_book: Optional[str] = None):
 
 @app.get("/books/{book_id}")
 async def get_book_by_id(book_id: UUID):
-    return [book for book in books if book.id == book_id]
+    for book in books:
+        if book.id == book_id:
+            return book
+
+    raise book_not_found_exception()
 
 
 @app.post("/books/")
@@ -73,8 +77,7 @@ async def update_book(book_id: UUID, book: Book):
         books[get_book_index[0]] = book
         return books[get_book_index[0]]
 
-    raise HTTPException(status_code=404, detail="Book not found", headers={
-                        "X-Header-Error": "No UUID Header found"})
+    raise book_not_found_exception()
 
 
 @app.delete("/books/{book_id}")
@@ -86,8 +89,7 @@ async def update_book(book_id: UUID):
         del books[get_book_index[0]]
         return f"{book_id} has been deleted successfully"
 
-    raise HTTPException(status_code=404, detail="Book not found", headers={
-                        "X-Header-Error": "No UUID Header found"})
+    raise book_not_found_exception()
 
 
 def generate_book_data():
@@ -116,3 +118,8 @@ def generate_book_data():
     books.append(book_2)
     books.append(book_3)
     books.append(book_4)
+
+
+def book_not_found_exception():
+    return HTTPException(status_code=404, detail="Book not found", headers={
+        "X-Header-Error": "No UUID Header found"})
