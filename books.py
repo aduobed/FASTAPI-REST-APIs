@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, status
 from pydantic import BaseModel, Field
 from uuid import UUID, uuid4
 from starlette.responses import JSONResponse
@@ -94,7 +94,7 @@ async def get_no_rating_book(book_id: UUID):
     raise book_not_found_exception()
 
 
-@app.post("/books/")
+@app.post("/books/", status_code=status.HTTP_201_CREATED)
 async def create_book(book: Book):
     if book.id is None:
         book.id = uuid4
