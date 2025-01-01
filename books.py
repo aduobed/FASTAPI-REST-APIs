@@ -39,6 +39,14 @@ class Book(BaseModel):
     }
 
 
+class BookNoRating(BaseModel):
+    id: UUID
+    title: str = Field(min_length=1, max_length=100)
+    author: str = Field(min_length=1, max_length=100)
+    description: Optional[str] = Field(
+        title="Description of the book", max_length=100, min_length=1, default=None)
+
+
 @app.exception_handler(NegativeNumberException)
 async def negative_number_exception_handler(request: Request, exception: NegativeNumberException):
     return JSONResponse(status_code=418, content={
@@ -51,7 +59,7 @@ async def get_all_books(number_of_books: Optional[int] = None):
     if number_of_books and number_of_books < 0:
         raise NegativeNumberException(books_to_return=number_of_books)
 
-    if len(books) < 1:  
+    if len(books) < 1:
         generate_book_data()
 
     if number_of_books and len(books) >= number_of_books > 0:
@@ -70,6 +78,15 @@ async def skip_book(skip_book: Optional[str] = None):
 
 @app.get("/books/{book_id}")
 async def get_book_by_id(book_id: UUID):
+    for book in books:
+        if book.id == book_id:
+            return book
+
+    raise book_not_found_exception()
+
+
+@app.get("/books/no_rating/{book_id}", response_model=BookNoRating)
+async def get_no_rating_book(book_id: UUID):
     for book in books:
         if book.id == book_id:
             return book
