@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from uuid import UUID, uuid4
 
@@ -66,19 +66,28 @@ async def create_book(book: Book):
 
 @app.put("/books/{book_id}")
 async def update_book(book_id: UUID, book: Book):
-    get_book_index = int([idx for idx, val in enumerate(
-        books) if book_id == val.id][0])
-    books[get_book_index] = book
-    return books[get_book_index]
+    get_book_index = [idx for idx, val in enumerate(
+        books) if book_id == val.id]
+
+    if get_book_index:
+        books[get_book_index[0]] = book
+        return books[get_book_index[0]]
+
+    raise HTTPException(status_code=404, detail="Book not found", headers={
+                        "X-Header-Error": "No UUID Header found"})
 
 
 @app.delete("/books/{book_id}")
 async def update_book(book_id: UUID):
-    get_book_index = int([idx for idx, val in enumerate(
-        books) if book_id == val.id][0])
-    del books[get_book_index]
+    get_book_index = [idx for idx, val in enumerate(
+        books) if book_id == val.id]
 
-    return f"{book_id} has been deleted successfully"
+    if get_book_index:
+        del books[get_book_index[0]]
+        return f"{book_id} has been deleted successfully"
+
+    raise HTTPException(status_code=404, detail="Book not found", headers={
+                        "X-Header-Error": "No UUID Header found"})
 
 
 def generate_book_data():
