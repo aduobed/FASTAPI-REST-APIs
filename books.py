@@ -1,6 +1,6 @@
-from typing import Optional
+from typing import Optional, Annotated
 
-from fastapi import FastAPI, HTTPException, Request, status
+from fastapi import FastAPI, HTTPException, Request, status, Form
 from pydantic import BaseModel, Field
 from uuid import UUID, uuid4
 from starlette.responses import JSONResponse
@@ -100,6 +100,11 @@ async def create_book(book: Book):
         book.id = uuid4
     books.append(book)
     return books
+
+
+@app.post("/user/login")
+async def user_login(username: Annotated[str, Form()], password: Annotated[str, Form()]):
+    return {"username": username, "password": password}
 
 
 @app.put("/books/{book_id}")
